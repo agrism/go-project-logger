@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-func main()  {
+func main() {
 
 	cmd := flag.String("action", "", "")
 	flag.Parse()
@@ -20,10 +20,20 @@ func main()  {
 		os.Exit(1)
 	}
 
-	pathes := []string{"/Users/agris/Pay Later Group/micro-services/accounts/public/index.php",
-		"/Users/agris/Pay Later Group/micro-services/mobile/public/index.php"}
+	pathes := []string{
+		"/Users/agris/Pay Later Group/micro-services/accounts/public/index.php",
+		"/Users/agris/Pay Later Group/micro-services/mobile/public/index.php",
+		"/Users/agris/Pay Later Group/micro-services/merchant/public/index.php",
+		"/Users/agris/Pay Later Group/micro-services/customer-portal/public/index.php",
+		"/Users/agris/Pay Later Group/micro-services/external-service/public/index.php",
+		"/Users/agris/Pay Later Group/micro-services/documents/public/index.php",
+		"/Users/agris/Pay Later Group/micro-services/address/public/index.php",
+		"/Users/agris/Pay Later Group/micro-services/merchant-portal/public/index.php",
+		"/Users/agris/git.paylatergroup.com/code/Micro-Service-Consumer-Level-Lending-API/public/index.php",
+		"/Users/agris/Pay Later Group/legacy/LMP/public_html/index.php",
+	}
 
-	for _, path := range pathes{
+	for _, path := range pathes {
 		content, err := readLines(path)
 		if err != nil {
 			panic(err)
@@ -65,7 +75,7 @@ func main()  {
 					newContent = append(newContent, phpCodeSlice...)
 				}
 
-				newContent = append(newContent, s);
+				newContent = append(newContent, s)
 			}
 		}
 
@@ -73,7 +83,7 @@ func main()  {
 	}
 }
 
-func readLines(path string) ([]string, error)  {
+func readLines(path string) ([]string, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -88,13 +98,13 @@ func readLines(path string) ([]string, error)  {
 	return lines, scanner.Err()
 }
 
-func writeToFile(path string, content []string) error  {
+func writeToFile(path string, content []string) error {
 
 	f2, err := os.OpenFile(path, os.O_TRUNC|os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	defer f2.Close()
 
 	if err != nil {
-		 fmt.Println(fmt.Errorf("could not open file %q for truncation: %v", path, err))
+		fmt.Println(fmt.Errorf("could not open file %q for truncation: %v", path, err))
 	}
 
 	fmt.Println("truncate end")
@@ -104,7 +114,7 @@ func writeToFile(path string, content []string) error  {
 		return err
 	}
 
-	for _, s := range content{
+	for _, s := range content {
 
 		if _, err := f2.WriteString(s + "\n"); err != nil {
 			log.Println(err)
