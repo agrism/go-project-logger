@@ -20,7 +20,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	pathes := []string{
+	projectPathes := []string{
 		"/Users/agris/Pay Later Group/micro-services/accounts/public/index.php",
 		"/Users/agris/Pay Later Group/micro-services/mobile/public/index.php",
 		"/Users/agris/Pay Later Group/micro-services/merchant/public/index.php",
@@ -33,8 +33,8 @@ func main() {
 		"/Users/agris/Pay Later Group/legacy/LMP/public_html/index.php",
 	}
 
-	for _, path := range pathes {
-		content, err := readLines(path)
+	for _, projectPath := range projectPathes {
+		content, err := readLines(projectPath)
 		if err != nil {
 			panic(err)
 		}
@@ -42,22 +42,23 @@ func main() {
 		var newContent []string
 
 		phpCodeSlice, err := readLines(pwd + "/phpcode.php")
+		phpCodeSlice = phpCodeSlice[1:] // remove first line "<?php"
 
 		if err != nil {
 			panic(err)
 		}
 
-		fmt.Println(phpCodeSlice[len(phpCodeSlice)-1])
-
 		if string(*cmd) == "remove" {
-			fmt.Println("REMOVE")
+			fmt.Println("REMOVING from project " + projectPath)
 
 			startDelete := false
+			hasAnyLineToDelete :=false
 
 			for _, s := range content {
 
 				if phpCodeSlice[0] == s {
 					startDelete = true
+					hasAnyLineToDelete = true;
 				}
 
 				if startDelete == false {
@@ -68,18 +69,41 @@ func main() {
 					startDelete = false
 				}
 			}
+
+			if(hasAnyLineToDelete != true){
+				fmt.Println("No code to delete in this project")
+			} else {
+				writeToFile(projectPath, newContent)
+				fmt.Println("Removing done....")
+			}
+
+
 		} else {
-			fmt.Println("ADD")
-			for i, s := range content {
-				if i == 1 && s != phpCodeSlice[0] {
-					newContent = append(newContent, phpCodeSlice...)
+			fmt.Println("ADDING to project" + projectPath)
+
+			codeAlreadyInsterted := false
+			for _, s := range content {
+				if s == phpCodeSlice[0]{
+					codeAlreadyInsterted = true
+				}
+			}
+
+			if codeAlreadyInsterted == true {
+				fmt.Println("code already inserted, stop adding...")
+			} else {
+				for i, s := range content {
+
+					if i == 1 && s != phpCodeSlice[0] {
+						newContent = append(newContent, phpCodeSlice...)
+					}
+
+					newContent = append(newContent, s)
 				}
 
-				newContent = append(newContent, s)
+				writeToFile(projectPath, newContent)
+				fmt.Println("Adding done....")
 			}
 		}
-
-		writeToFile(path, newContent)
 	}
 }
 
@@ -106,8 +130,6 @@ func writeToFile(path string, content []string) error {
 	if err != nil {
 		fmt.Println(fmt.Errorf("could not open file %q for truncation: %v", path, err))
 	}
-
-	fmt.Println("truncate end")
 
 	if err != nil {
 		panic(err)
