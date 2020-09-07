@@ -4,11 +4,21 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"github.com/spf13/viper"
 	"log"
 	"os"
+	"strings"
 )
 
 func main() {
+
+	viper.SetConfigFile(".env")
+
+	err := viper.ReadInConfig()
+
+	if err != nil {
+		log.Fatalf("Error while reading config file %s", err)
+	}
 
 	cmd := flag.String("action", "", "")
 	flag.Parse()
@@ -20,20 +30,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	projectPathes := []string{
-		"/Users/agris/Pay Later Group/micro-services/accounts/public/index.php",
-		"/Users/agris/Pay Later Group/micro-services/mobile/public/index.php",
-		"/Users/agris/Pay Later Group/micro-services/merchant/public/index.php",
-		"/Users/agris/Pay Later Group/micro-services/customer-portal/public/index.php",
-		"/Users/agris/Pay Later Group/micro-services/external-service/public/index.php",
-		"/Users/agris/Pay Later Group/micro-services/documents/public/index.php",
-		"/Users/agris/Pay Later Group/micro-services/address/public/index.php",
-		"/Users/agris/Pay Later Group/micro-services/merchant-portal/public/index.php",
-		"/Users/agris/git.paylatergroup.com/code/Micro-Service-Consumer-Level-Lending-API/public/index.php",
-		"/Users/agris/Pay Later Group/legacy/LMP/public_html/index.php",
-	}
+	r := viper.Get("PROJECTS_PATHS")
 
-	for _, projectPath := range projectPathes {
+	projectPaths := strings.Split(r.(string), ",")
+
+	for _, projectPath := range projectPaths {
 		content, err := readLines(projectPath)
 		if err != nil {
 			panic(err)
@@ -52,13 +53,13 @@ func main() {
 			fmt.Println("REMOVING from project " + projectPath)
 
 			startDelete := false
-			hasAnyLineToDelete :=false
+			hasAnyLineToDelete := false
 
 			for _, s := range content {
 
 				if phpCodeSlice[0] == s {
 					startDelete = true
-					hasAnyLineToDelete = true;
+					hasAnyLineToDelete = true
 				}
 
 				if startDelete == false {
@@ -70,20 +71,19 @@ func main() {
 				}
 			}
 
-			if(hasAnyLineToDelete != true){
+			if hasAnyLineToDelete != true {
 				fmt.Println("No code to delete in this project")
 			} else {
 				writeToFile(projectPath, newContent)
 				fmt.Println("Removing done....")
 			}
 
-
 		} else {
 			fmt.Println("ADDING to project" + projectPath)
 
 			codeAlreadyInsterted := false
 			for _, s := range content {
-				if s == phpCodeSlice[0]{
+				if s == phpCodeSlice[0] {
 					codeAlreadyInsterted = true
 				}
 			}
